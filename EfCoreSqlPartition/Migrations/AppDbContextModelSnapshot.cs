@@ -85,7 +85,7 @@ namespace EfCoreSqlPartition.Migrations
                     b.HasOne("EfCoreSqlPartition.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -94,13 +94,13 @@ namespace EfCoreSqlPartition.Migrations
                     b.HasOne("EfCoreSqlPartition.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EfCoreSqlPartition.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId", "BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

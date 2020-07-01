@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EfCoreSqlPartition.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200701152500_Initial")]
+    [Migration("20200701180740_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,7 +87,7 @@ namespace EfCoreSqlPartition.Migrations
                     b.HasOne("EfCoreSqlPartition.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 
@@ -96,13 +96,13 @@ namespace EfCoreSqlPartition.Migrations
                     b.HasOne("EfCoreSqlPartition.Business", "Business")
                         .WithMany()
                         .HasForeignKey("BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("EfCoreSqlPartition.Customer", "Customer")
                         .WithMany("Orders")
                         .HasForeignKey("CustomerId", "BusinessId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
                 });
 #pragma warning restore 612, 618
