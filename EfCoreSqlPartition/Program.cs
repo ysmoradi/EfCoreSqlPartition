@@ -50,14 +50,20 @@ namespace EfCoreSqlPartition
 
                 /*await using AppDbContext dbContext2 = serviceProvider.GetRequiredService<AppDbContext>();
 
-                var customers = await dbContext.Customers
+                var customers = await dbContext2.Customers
+                    .Where(c => c.BusinessId == Guid.Parse("2B8DD4BE-C793-488B-A8D2-0000AE036924"))
                     .Select(c => new
                     {
                         c.Id,
                         c.Name,
-                        c.Orders.Count
+                        c.Orders.Count // Orders.BusinessId = N'2B8DD4BE-C793-488B-A8D2-0000AE036924' will be applied by ef which boosts performance
                     })
-                    .ToArrayAsync();*/
+                    .ToArrayAsync();
+
+                var customers2 = await dbContext2.Customers
+                    .Include(c => c.Orders) // in join predicate we have Orders.BusinessId = Customers.BusinessId which boosts performance
+                    .Where(c => c.BusinessId == Guid.Parse("2B8DD4BE-C793-488B-A8D2-0000AE036924"))
+                    .ToArrayAsync(); */
             }
         }
     }
