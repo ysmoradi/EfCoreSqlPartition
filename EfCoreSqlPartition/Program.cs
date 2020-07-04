@@ -254,7 +254,7 @@ create function BusinessIdProvider()
 returns uniqueidentifier
 as
 begin
-	return(select min(BusinessId.Id) from BusinessIds as BusinessId where BusinessId.Id > (select isnull(max(Business.Id), '00000000-0000-0000-0000-000000000000') from Businesses as Business))
+	return(select top 1 BusinessIds.Id from BusinessIds left outer join Businesses on BusinessIds.Id = Businesses.Id where Businesses.Id is null)
 end");
 
             foreach (Guid businessId in businessIds)
