@@ -33,17 +33,17 @@ namespace EfCoreSqlPartition
             {
                 AppDbContext dbContext = serviceProvider.GetRequiredService<AppDbContext>();
 
-                var business = (await dbContext.Businesses.AddAsync(new Business { Name = "Test1" })).Entity;
+                Business business = (await dbContext.Businesses.AddAsync(new Business { Name = "Test1" })).Entity;
 
                 await dbContext.SaveChangesAsync();
 
                 for (int j = 0; j < 6; j++)
                 {
-                    var customer = (await dbContext.Customers.AddAsync(new Customer { BusinessId = business.Id, Name = "Customer1" })).Entity;
+                    Customer customer = (await dbContext.Customers.AddAsync(new Customer { BusinessId = business.Id, Name = "Customer1" })).Entity;
 
                     await dbContext.SaveChangesAsync();
 
-                    var order = await dbContext.Orders.AddAsync(new Order { CustomerId = customer.Id, Date = DateTimeOffset.UtcNow, BusinessId = business.Id });
+                    await dbContext.Orders.AddAsync(new Order { CustomerId = customer.Id, Date = DateTimeOffset.UtcNow, BusinessId = business.Id });
 
                     await dbContext.SaveChangesAsync();
                 }
@@ -60,10 +60,10 @@ namespace EfCoreSqlPartition
                     })
                     .ToArrayAsync();
 
-                var customers2 = await dbContext2.Customers
+                Customer[] customers2 = await dbContext2.Customers
                     .Include(c => c.Orders) // in join predicate we have Orders.BusinessId = Customers.BusinessId which boosts performance
                     .Where(c => c.BusinessId == Guid.Parse("2B8DD4BE-C793-488B-A8D2-0000AE036924"))
-                    .ToArrayAsync(); */
+                    .ToArrayAsync();*/
             }
         }
     }
@@ -86,9 +86,10 @@ namespace EfCoreSqlPartition
 
                 base.Generate(operation, model, tempBuilder, terminate: false);
 
-                var createTableCommand = tempBuilder.GetCommandList().Single().CommandText;
+                string createTableCommand = tempBuilder.GetCommandList().Single().CommandText;
 
-                builder.AppendLine($"{createTableCommand.Substring(0, createTableCommand.Length - 3)} ON BusinessPartitionScheme(BusinessId);");
+                builder.AppendLine(createTableCommand[0..^3]);
+                builder.Append(" ON BusinessPartitionScheme(BusinessId);");
             }
             else
             {
