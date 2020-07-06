@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EfCoreSqlPartition.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200701180740_Initial")]
+    [Migration("20200706073638_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,11 +48,13 @@ namespace EfCoreSqlPartition.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id", "BusinessId");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });

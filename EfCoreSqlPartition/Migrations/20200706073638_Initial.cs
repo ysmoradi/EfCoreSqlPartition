@@ -27,7 +27,7 @@ namespace EfCoreSqlPartition.Migrations
                 {
                     Id = table.Column<Guid>(nullable: false, defaultValueSql: "NewSequentialId()"),
                     BusinessId = table.Column<Guid>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
+                    Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,9 +67,10 @@ namespace EfCoreSqlPartition.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Customers_BusinessId",
+                name: "IX_Customers_BusinessId_Name",
                 table: "Customers",
-                column: "BusinessId");
+                columns: new[] { "BusinessId", "Name" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_BusinessId",

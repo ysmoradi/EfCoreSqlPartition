@@ -153,6 +153,10 @@ namespace EfCoreSqlPartition
                 .HasKey(customer => new { customer.Id, customer.BusinessId });
 
             modelBuilder.Entity<Customer>()
+                .HasIndex(customer => new { customer.BusinessId, customer.Name })
+                .IsUnique();
+
+            modelBuilder.Entity<Customer>()
                 .Property(customer => customer.Id)
                 .HasDefaultValueSql("NewSequentialId()");
 
@@ -207,6 +211,7 @@ namespace EfCoreSqlPartition
         [Key]
         public Guid Id { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
         [ForeignKey(nameof(BusinessId))]

@@ -46,11 +46,13 @@ namespace EfCoreSqlPartition.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id", "BusinessId");
 
-                    b.HasIndex("BusinessId");
+                    b.HasIndex("BusinessId", "Name")
+                        .IsUnique();
 
                     b.ToTable("Customers");
                 });
