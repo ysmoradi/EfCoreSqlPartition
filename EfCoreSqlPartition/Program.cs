@@ -10,6 +10,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.SqlTypes;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EfCoreSqlPartition
@@ -39,7 +40,7 @@ namespace EfCoreSqlPartition
 
                 for (int j = 0; j < 6; j++)
                 {
-                    Customer customer = (await dbContext.Customers.AddAsync(new Customer { BusinessId = business.Id, Name = "Customer1" })).Entity;
+                    Customer customer = (await dbContext.Customers.AddAsync(new Customer { BusinessId = business.Id, Name = $"Customer{Guid.NewGuid()}" })).Entity;
 
                     await dbContext.SaveChangesAsync();
 
@@ -80,7 +81,7 @@ namespace EfCoreSqlPartition
 
         protected override void Generate(CreateTableOperation operation, IModel model, MigrationCommandListBuilder builder, bool terminate = true)
         {
-            if (operation.Columns.Any(c => c.Name == "BusinessId"))
+            if (operation.Columns.Any(c => c.Name == nameof(IBusinessAware.BusinessId)))
             {
                 MigrationCommandListBuilder tempBuilder = new MigrationCommandListBuilder(_dependencies);
 
@@ -90,6 +91,8 @@ namespace EfCoreSqlPartition
 
                 builder.AppendLine(createTableCommand[0..^3]);
                 builder.Append(" ON BusinessPartitionScheme(BusinessId);");
+
+                builder.AppendLine($"{Environment.NewLine}alter table {operation.Name} set (LOCK_ESCALATION = AUTO);");
             }
             else
             {
@@ -240,13 +243,13 @@ namespace EfCoreSqlPartition
     {
         public static void PrepareBusinessBasedPartitioning(this MigrationBuilder migrationBuilder)
         {
-            SqlGuid[] businessIds = Enumerable.Range(1, 149_990)
+            SqlGuid[] businessIds = Enumerable.Range(1, 149_850)
                 .Select(_ => (SqlGuid)Guid.NewGuid())
                 .OrderBy(_ => _)
                 .ToArray();
 
             SqlGuid[] partitionIds = businessIds
-                .Where((_, index) => index % 10 == 0) // sql server max supports 15_000 partitions => 149_990 / 10 => 14_999
+                .Where((_, index) => index % 150 == 0)
                 .ToArray();
 
             migrationBuilder.Sql($"create partition function BusinessPartitioner (uniqueidentifier) as range left for values ({string.Join(",", partitionIds.Select(business => $"'{business}'"))})");
@@ -263,10 +266,26 @@ begin
 	return(select top 1 BusinessIds.Id from BusinessIds left outer join Businesses on BusinessIds.Id = Businesses.Id where Businesses.Id is null)
 end");
 
-            foreach (Guid businessId in businessIds)
+            int batchItems = 0;
+
+            do
             {
-                migrationBuilder.Sql($"insert into BusinessIds (Id) values('{businessId}')");
-            }
+                SqlGuid[] currentBusinessIds = businessIds.Skip(batchItems).Take(1000).ToArray();
+
+                if (!currentBusinessIds.Any())
+                    break;
+
+                StringBuilder insertBusinessIdsSql = new StringBuilder();
+
+                insertBusinessIdsSql.AppendLine("insert into BusinessIds (Id) values");
+
+                insertBusinessIdsSql.AppendLine(string.Join(",", currentBusinessIds.Select(item => $"('{item}')")));
+
+                migrationBuilder.Sql(insertBusinessIdsSql.ToString());
+
+                batchItems += 1000;
+
+            } while (true);
         }
     }
 }

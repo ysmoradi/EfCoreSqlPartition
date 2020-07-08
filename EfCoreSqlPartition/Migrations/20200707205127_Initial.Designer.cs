@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EfCoreSqlPartition.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20200706073638_Initial")]
+    [Migration("20200707205127_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
